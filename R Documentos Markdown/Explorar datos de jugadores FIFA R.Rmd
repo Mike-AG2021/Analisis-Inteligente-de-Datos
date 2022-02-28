@@ -1,0 +1,224 @@
+---
+title: "Explorar datos de jugadores FIFA R"
+author: Jesús Miguel Acosta Gurrola
+date: 27/02/2022
+output: html_document
+---
+
+## Objetivo
+
+Explorar datos de jugadores de FIFA de un archivo csv por medio de librería pandas
+
+## Descripción
+
+Identificar una ruta WEB en donde se encuentra un archivo csv que contenga varias variables con lo cual se podrá importar con la función de read (lectura) que permitirá explorar sus datos.
+
+## Marco teórico
+
+La exploración de datos es un primer paso del análisis de datos que se utiliza para explorar y visualizar datos para descubrir conocimientos desde el mismo inicio o identificar áreas o patrones para profundizarlos más. [texto del vínculo](https://www.tibco.com/es/reference-center/what-is-data-exploration#:~:text=La%20exploraci%C3%B3n%20de%20datos%20es,o%20patrones%20para%20profundizarlos%20m%C3%A1s.)
+
+## Desarrollo
+
+Va a contener varios elementos:
+
+-   Cargar librerías
+
+-   Cargar datos
+
+-   Explorar datos
+
+-   Visualizar datos
+
+## Cargar librerías
+
+```{r}
+library(readr)
+library(dplyr)
+library(lubridate)
+library(fdth)
+library(ggplot2)
+library(fdth)
+#library(Hmisc)
+```
+
+## Cargar datos
+
+Los datos se encuentran en la URL: <https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/datos.FIFA.limpios.csv>
+
+```{r}
+datos <- read.csv("https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/datos.FIFA.limpios.csv", encoding = "UFT-8" )
+
+```
+
+```{r}
+source("misfunciones.r")
+```
+
+```{r}
+datos <- mutate(datos, Estatura = festatura(Height), Pesokgs = flbskgs(Weight))
+```
+
+```{r}
+datos.reduc <- select(datos, Name, Age, Nationality, Overall, Potential, Club, Preferred.Foot, Height, Aggression, Weight, Estatura, Pesokgs)
+
+head(datos.reduc)
+```
+
+## Explorar Datos
+
+### head()
+
+Explorar los primeros registros con función head()
+
+```{r}
+head(datos[,c(3,4,6,8,9,10,12,13,14,15,27,28)], 10)
+```
+
+### tail()
+
+Explorar los últimos registros
+
+```{r}
+tail(datos[,c(3,4,6,8,9,10,12,13,14,15,27,28)], 10)
+```
+
+### Tipo de dato
+
+Se identifica el tipo de datos que tiene la variable datos siendo un data.frame y cada variable de datos.
+
+```{r}
+is(datos)
+```
+
+```{r}
+str(datos.reduc)
+```
+
+Podemos ver cuantos datos existen en el "data.frame" nos indica que hay 17955 filas(observaciones) y 50 columnas(variables).
+
+```{r}
+dim(datos)
+```
+
+### Decripción de los datos
+
+Se presenta valores estadísticos de los datos del archivo importado
+
+```{r}
+#describe(datos.reduc)
+```
+
+### Estadísticos de variable de interés
+
+### Nacionalidad
+
+```{r}
+nacionalidad = dim(datos)
+```
+
+```{r}
+nacion <- datos.reduc %>%
+  group_by (Nationality) %>%
+  summarise(n = n()) 
+```
+
+```{r}
+nacion <- arrange(nacion, desc(n))
+head(nacion, 30)
+```
+
+```{r}
+tail(nacion, 10)
+```
+
+```{r}
+ggplot(data = head(nacion, 10), aes(x = Nationality, y = n, col = (Nationality)))+
+  geom_bar(stat = "identity")
+```
+
+### Pié preferido
+
+```{r}
+pie.preferido <- datos.reduc %>%
+  group_by (Preferred.Foot) %>%
+  summarise(n = n())
+```
+
+```{r}
+pie.preferido <- arrange(pie.preferido, desc(n))
+head(pie.preferido, 3)
+```
+
+### Datos de pie preferido limpios
+
+Existen un total de jugadores que juegan con pierna derecha con un total de "13748" y con pierna Izquierda con un total de "4159"
+
+```{r}
+head(pie.preferido, 2)
+```
+
+```{r}
+pie.preferido <- datos.reduc %>%
+  group_by (Preferred.Foot) %>%
+  summarise(n = n())
+```
+
+```{r}
+ggplot(data = head(pie.preferido, 3), aes(x = Preferred.Foot, y = n)) +
+  geom_bar(stat = "identity", col = rainbow(3))
+```
+
+### **¿Qué jugadores hay más zurdos o derechos?**
+
+-   Agrupar por el tipo de pie utilizando el conjunto de datos original datos.FIFA
+
+```{r}
+datos.pie.preferido <- datos %>%
+  group_by(Preferred.Foot) %>%
+  summarise(cuantos = n(), porc = paste(round(n() / nrow(datos) * 100,2),"%"))
+datos.pie.preferido
+```
+
+### Edad de jugadores
+
+```{r}
+age.nacion <- datos.reduc %>%
+  group_by (Nationality) %>%
+  summarise(n = n(), media = round(mean(Age),2), mediana = round(median(Age),2)) 
+```
+
+```{r}
+age.nacion <- arrange(age.nacion, media)
+head(age.nacion, 10)
+
+```
+
+```{r}
+tail(age.nacion, 10)
+```
+
+-   Con respecto a lo que muestra la media de la edad de los jugadores por país, hay países con un sólo jugador, de tal forma que no es representativo.
+
+-   Se suele tomar un criterio, por ejemplo, los que países que tengan el número de jugadores IGUAL O por ENCIMA del valor de la media o de la mediana con respecto a la varriable edad 'Age'.
+
+-   Se toma la mean = media como medida de comparación
+
+```{r}
+la.media<- round(mean(age.nacion$n),0)
+la.media
+```
+
+### Agresión
+
+```{r}
+datos.agression <- datos %>%
+  group_by(Aggression) %>%
+  summarise(cuantos = n(), porc = paste(mean(n() / nrow(datos) * 100,2),"%"))
+datos.agression
+```
+
+## Interpretación
+
+El conjunto de datos tiene 17955 observaciones y 50 variables.
+
+El analisis de datos que hicimos fue con el conjunto de datos de FIFA. Los datos se encuentran en la direccion <https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/datos.FIFA.limpios.csv> y contiene 17955 observaciones y 50 variables. En este analisis de datos fue necesario una limpieza de datos un tanto batallosa ya que algunos datos que vienen no son tan factibles para usar como lo son el ejemplo del peso y la estatura ya que se manejaba en pies y libras. Tambien tuvimos que agregar pais de donde es el club y agregar region para saber a cual pertenecen. Ya cuando se haga la limpieza se genero un conjunto de datos mas manipuble solo con los atributos que utilizariamos. En este analisis pudimos observar por ejemplo que el pais que tiene mas jugadores es Inglaterra con 1662 y el que menos tiene es Nueva Caledonia. Tambien observamos que el pais que tiene el rango de edad mas joven es Indonesia con 17 años y el que tiene el mayor rango es Fiji con 30 años aunque en ocasiones no es significativo ya que el pais solo tiene 1 jugador en algunos casos. Sacamos que el pais que tiene mas equipos en este conjunto de datos es Inglaterra con 48 equipos. Obtuvimos que el continente con mayor valor de mercado es Europa con 5360557 y el menor es Oceania con 747600. Gracias al analisis de estos datos pudimos comprender la importancia de la limpieza de los datos.\
