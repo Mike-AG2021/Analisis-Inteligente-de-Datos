@@ -1,0 +1,292 @@
+---
+title: "Regresion Lineal Simple variables Peso Estatura Datos FIFA"
+author: Jesús Miguel Acosta Gurrola
+date: 07/03/2022
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    toc_depth: 6
+    number_sections: yes
+---
+
+# Objetivo
+
+Realizar predicciones de peso de jugadores de futbol con los datos de FIFA de acuerdo a la variable estatura
+
+# Descripción
+
+-   Cargar libreias
+
+-   Cargar datos
+
+-   Seleccionar variables de estudio estatura y peso
+
+-   Crear datos de entrenamiento y datos de validacion
+
+-   Construir el modelo de regresion lineal simple
+
+-   Evaluar el modelo
+
+-   Realizar predicciones con datos nuevos
+
+# Desarrollo
+
+## Cargar librerías
+
+```{r message=FALSE, warning=FALSE}
+library(readr) # Para importar datos
+library(dplyr) # Para filtrar   
+library(knitr) # Para datos tabulares
+library(ggplot2) # Para visualizar
+library(plotly)
+library(caret)  # Para particionar
+library(Metrics) # Para determinar rmse 
+```
+
+## Cargar datos
+
+```{r}
+datos <- read.csv("https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/datos.FIFA.limpios.csv", encoding = "UFT-8" )
+```
+
+## Explorar datos
+
+```{r}
+summary(datos$Estatura)
+summary(datos$PesoKgs)
+print('Peso')
+```
+
+Se detectaron 48 registros con valores 'NA' por lo que se quitan del conjunto de datos ya que se representan solo el .26% o sea menos del 1%.
+
+```{r}
+datos.limpios <- subset(datos, !is.na(Estatura))
+```
+
+Explorar datos
+
+```{r}
+str(datos)
+```
+
+## Limpiar datos
+
+Se detectaron 48 registros con valores NA por lo cual se quitan del conjunto de datos ya que solo representan tan solo el 0.26% o sea menos del 1%.
+
+```{r}
+datos.limpios <- subset(datos, !is.na(Estatura))
+
+```
+
+## Partir datos
+
+Se identifica el numero de observaciones n *y se* siembra la semilla a 2022 para construir los mismos valores aleatorios por la función *createDataPartition().*
+
+```{r}
+n <- nrow(datos.limpios)
+
+# Modificar la semilla estableciendo como par´metro los útimos cuatro dígitos de su no de control. 
+# Ej. set.seed(0732), o set.seed(1023)
+# set.seed(2022) 
+set.seed(2022)
+```
+
+De manera aleatoria se construyen los datos de entrenamiento y los datos de validación.
+
+En la variable *entrena* se generan los registros que van a ser los datos de entrenamiento, de tal forma que los datos de validación serán los que no sena de entrenamiento [-*entrena*].\
+
+```{r}
+entrena <- createDataPartition(y = datos.limpios$PesoKgs, p = 0.70, list = FALSE, times = 1)
+
+# Datos entrenamiento
+datos.entrenamiento <- datos.limpios[entrena,]  # [renglones, columna]
+
+# Datos validación
+datos.validacion <- datos.limpios[-entrena, ]
+```
+
+```{r}
+kable(head(datos.entrenamiento[, c('X', 'Name', 'Estatura', 'PesoKgs')], 20), caption = "Datos de entrenamiento")
+
+```
+
+Mostrar los primeros 20 y últimos 20 registros de los datos de validación.
+
+```{r}
+kable(head(datos.validacion[, c('X', 'Name', 'Estatura', 'PesoKgs')], 20), caption = "Datos de validación")
+
+```
+
+Visualizar dispersión de los datos de entrenamiento con las variables de interés *Estatura* y *PesoKgs.*
+
+```{r}
+g <- plot_ly(data = datos.entrenamiento, 
+             x = ~Estatura, 
+             y = ~PesoKgs) %>%
+layout(title = 'Jugadores FIFA. Dispersión de estatura en metros y peso en kilogramos.')
+  
+g
+```
+
+## Construir el modelo
+
+Con los datos de entrenamiento construir el modelo de regresión lineal simple.
+
+$$
+Y = a+bx
+$$
+
+$$
+Y = β0+β1⋅x
+
+
+$$
+
+De las dos variables de interés, *Estatura* y *PesoKgs* se determina que la variable predictora es *Estatura y el PesoKgs* es la variable de respuesta o también*:*
+
+-   *Estatura* es variable independiente y
+
+-   *PesoKgs* es variable dependiente
+
+Es decir, la variable *PesoKgs* depende de la *Estatura*
+
+```{r}
+modelo <- lm(data = datos.entrenamiento, formula = PesoKgs ~ Estatura)
+modelo
+```
+
+## Coeficientes del modelo
+
+Se determinan los valores de a y b de la fórmula $Y=a+bx$
+
+```{r}
+a <- modelo$coefficients[1]
+b <- modelo$coefficients[2]
+
+paste("Valor de la abcisa a es   : ", round(a, 6))
+```
+
+```{r}
+paste("Valor de la pendiente b es: ", round(b, 6))
+```
+
+## Linea de tendencia del modelo
+
+Con la el valor de los valores de tendencia o valores ajustados del modelo se visualiza la recta de tendencia del modelo.
+
+La gráfica *g* se construye por partes, primero la dispersión, segundo la linea de tendencia, tercero se agrega el título, para luego solo mostrar la gráfica *g*.
+
+```{r}
+g <- plot_ly(data = datos.entrenamiento, 
+             x = ~Estatura, 
+             y = ~PesoKgs, 
+             name = 'Dispersión',
+             type = 'scatter', 
+             mode = 'markers', 
+             color = I('blue')) 
+g <- g %>% add_trace(x = ~Estatura,
+                     y = ~modelo$fitted.values, name = 'Tendencia', mode = 'lines+markers', color = I('red'))
+g <- g %>%
+layout(title = 'Jugadores FIFA. Dispersión y Tendencia de estatura en metros y peso en kilogramos.')
+g
+```
+
+## Predicciones
+
+Con los datos de validación, se hacen predicciones con la función *predict(),* luego se presentan algunas de las mismas prediccciones que pueden ser los mismos valores de *Estatura* o con nuevos valores calculadas manualmente usando la fórmula Y=a+bxY=a+bx.
+
+Se hace un *data.frame* de comparaciones con lo cual se presentan los valores reales y los valores de las predicciones. Se presenta solo las primeras 20 y últimas 20 predicciones.
+
+```{r}
+predicciones <- predict(object = modelo, newdata = datos.validacion)
+
+comparaciones <- data.frame(Estatura = datos.validacion$Estatura, PesoKgs = datos.validacion$PesoKgs, predicccion = predicciones)
+```
+
+```{r}
+ kable(x = head(comparaciones, 20), caption = "Predicciones")
+
+```
+
+```{r}
+  kable(x = tail(comparaciones, 20), caption = "Predicciones")
+
+```
+
+```{r}
+x <- c(1.70, 1.80, 1.90)
+
+Y = a + b * x
+Y 
+```
+
+## Evaluación del modelo
+
+-   ¿Que tan bien predice el modelo?
+
+-   ¿Es bueno el modelo de regresión lineal simple ?
+
+-   ¿Cuáles estadísticos hay que calcular e identificar para evaluar el modelo?
+
+```{r}
+summary(modelo)
+
+```
+
+## Multiple R-squared
+
+De acuerdo al estadístico *Multiple R-squared* con valor 0.5681, significa que la variable Estatura representa tan solo el 56.81% del valor del PesoKgs.
+
+El coeficiente de determinación identificado por expresión *R\^2* e identificado como *Multiple R-squared* determina la calidad del modelo para replicar los resultados y la proporción de variación de los resultados que puede explicarse por el modelo.
+
+Este valor Multiple R-squared es relativo al compararlo con un criterio inicial. Por ejemplo, si al principio se hubiera establecido que el modelo se acepta si hay un 70% o mas el modelo se acepta, entonces bajo esta premisa tal vez el modelo no se acepta ya que Multiple R-squared es 0.5666 que está por debajo del 70%.
+
+Sin embargo, si se hubiera establecido que se acepta con un valor por encima del 50%, entonces este modelo si se acepta ya que Multiple R-squared es 0.5666 o 56.66%.
+
+## Variables estadísticamente significativas
+
+Se observan que las variables estadísticas tanto el coeficiente de intersección como la variable predictiva *Estatura* si son altamente y estadísticamente significativas por debajo del 0.001 o con un nivel de confianza mayor al 99.9%. Se observa con los '\*\*\*' en las variables.
+
+## Error Cuadrático Medio (RMSE)
+
+La raiz del Error Cuadrático Medio (RMSE) es una métrica que dice qué tan lejos están los valores predichos de los valores observados o reales en un análisis de regresión, en promedio. Se calcula como:
+
+$$
+RMSE = \sqrt{\Sigma_{}^{}{\Big(\frac{predicho_i-real_i}{n}\Big)^2}}
+$$
+
+RMSE es una forma útil de ver qué tan bien un modelo de regresión puede ajustarse a un conjunto de datos.
+
+Cuanto mayor sea el RMSE, mayor será la diferencia entre los valores predichos y reales, lo que significa que peor se ajusta un modelo de regresión a los datos. Por el contrario, cuanto más pequeño sea el RMSE, mejor podrá un modelo ajustar los datos.
+
+Usando el *data.frame comparaciones* previamente construído se determina el RMSE manualmente.
+
+```{r}
+n <- nrow(comparaciones)
+rmse1 <- sqrt(sum((comparaciones$PesoKgs - comparaciones$predicccion)^2) / n)
+rmse1
+```
+
+Se puede usar la función *rmse()* de la librería *Metrics*
+
+```{r}
+rmse2 <- rmse(actual = comparaciones$PesoKgs, predicted = comparaciones$predicccio)
+rmse2
+```
+
+Usando la función *RMSE()* de la librería *caret*
+
+```{r}
+rmse3 <- RMSE(obs = comparaciones$PesoKgs, pred = comparaciones$predicccion)
+rmse3
+```
+
+En todos los cálculos el valor de *rmse* es de 4.631735, ¿que significa el valor de 4.6317353?
+
+Con base en RMSE, se puede comparar dos modelos diferentes entre sí y poder identificar qué modelo se ajusta mejor a la predicción de los datos.
+
+# Interpretacion
+
+El análisis de datos que hicimos fue con el conjunto de datos de FIFA. Los datos se encuentran en la dirección "[https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/datos.FIFA.limpios.csv"](https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/datos.FIFA.limpios.csv") y contiene 17955 observaciones y 50 variables. Nuestro propósito era hacer regresión lineal simple con esos datos.La variable independiente en este análisis es estatura de un jugador y la variable dependiente es Peso que será Valor en formato numérico que significa el valor de un jugador. Hicimos una correlación entre estas 2 variables y nos dio el resultado de 4.631735 que es una correlacion positiva considerable. El valor Multiple R-squared es 0.5666. Para este caso significa que se hubiera establecido el modelo se acepta si hay un 70% o mas . El valor de la variable Estatura representa tan solo el 56.81% del valor del PesoKgs. La variable predictiva *Estatura* si son altamente y estadísticamente significativas por debajo del 0.001 o con un nivel de confianza mayor al 99.9%El modelo predice positivamente considerable como se ve en la correlacion, hay probabilidad que otra variable tenga más relación con el Peso para tener un índice mayor de correlación. La diferencia es que hay mayor indice de correlacion.
