@@ -1,0 +1,2048 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Caso 1. Regresión Lineal Simple. Peso EstaTura datos FIFA.ipynb",
+      "provenance": [],
+      "collapsed_sections": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Mike-AG2021/Analisis-Inteligente-de-Datos/blob/main/Analisis-Inteligente-de-Datos/Pyhton%20documentos\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Author: \"Jesus Miguel Acosta Gurrola\"\n",
+        "\n",
+        "Date: \"07-03-2022\""
+      ],
+      "metadata": {
+        "id": "KXHeIj-G7Tj6"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "VGmpCZ_v7NA0"
+      },
+      "outputs": [],
+      "source": [
+        ""
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# Objetivo\n",
+        "\n",
+        "Realizar predicciones de peso de jugadores de fútbol con los datos de FIFA de acuerdo a la variable estatura a partir de un modelo de regresión lineal simple."
+      ],
+      "metadata": {
+        "id": "VyUlsn897dSx"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# Descripción \n",
+        "* Cargar librerías\n",
+        "\n",
+        "* Cargar datos\n",
+        "\n",
+        "* Seleccionar variables de estudio estatura y peso\n",
+        "\n",
+        "* Crear datos de entrenamiento y datos de validación\n",
+        "\n",
+        "* Construir el modelo de regresión lineal simple\n",
+        "\n",
+        "* Evaluar el modelo\n",
+        "\n",
+        "* Realizar predicciones con los datos validación\n",
+        "\n",
+        "* Realizar predicciones con datos nuevos\n",
+        "\n",
+        "* Interpretación del caso"
+      ],
+      "metadata": {
+        "id": "qz9fbrmI7ji5"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# Desarrollo\n"
+      ],
+      "metadata": {
+        "id": "qeC6JtRm7uIJ"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# Cargar librerias"
+      ],
+      "metadata": {
+        "id": "u7J8OaMX7v2Q"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "from sklearn import linear_model\n",
+        "from sklearn.linear_model import LinearRegression\n",
+        "#from sklearn.metrics import mean_squared_error, r2_score\n",
+        "import matplotlib.pyplot as plt\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn import metrics\n",
+        "#%matplotlib inline"
+      ],
+      "metadata": {
+        "id": "4Sx03Jy571FR"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Cargar datos\n",
+        "\n",
+        "Los datos se encuentran en la URL: https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/datos.FIFA.limpios.csv\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "zkPFOcJ57yZy"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "datos = pd.read_csv(\"https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/datos.limpios.csv\", encoding='latin1')\n"
+      ],
+      "metadata": {
+        "id": "mqbxw1iM8EQZ"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Explorar datos\n",
+        "\n",
+        "Solo se describen las variables de interés Estatura y PesoKgs"
+      ],
+      "metadata": {
+        "id": "Gx6NAdaSUjOH"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#datos.describe()\n",
+        "datos[['Estatura', 'PesoKgs']].describe()\n",
+        "# datos.head()\n",
+        "\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 300
+        },
+        "id": "tnNk1f23UlXP",
+        "outputId": "dd7b68e6-add9-4a1d-9375-b6dc3fc2d869"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "\n",
+              "  <div id=\"df-47c5ccd8-72df-4595-ac92-cfa813d3e836\">\n",
+              "    <div class=\"colab-df-container\">\n",
+              "      <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Estatura</th>\n",
+              "      <th>PesoKgs</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>count</th>\n",
+              "      <td>17907.000000</td>\n",
+              "      <td>17907.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>mean</th>\n",
+              "      <td>1.812325</td>\n",
+              "      <td>75.279478</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>std</th>\n",
+              "      <td>0.067671</td>\n",
+              "      <td>7.077378</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>min</th>\n",
+              "      <td>1.550000</td>\n",
+              "      <td>49.900000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>25%</th>\n",
+              "      <td>1.750000</td>\n",
+              "      <td>69.850000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>50%</th>\n",
+              "      <td>1.800000</td>\n",
+              "      <td>74.840000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>75%</th>\n",
+              "      <td>1.850000</td>\n",
+              "      <td>79.830000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>max</th>\n",
+              "      <td>2.060000</td>\n",
+              "      <td>110.220000</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>\n",
+              "      <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-47c5ccd8-72df-4595-ac92-cfa813d3e836')\"\n",
+              "              title=\"Convert this dataframe to an interactive table.\"\n",
+              "              style=\"display:none;\">\n",
+              "        \n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "       width=\"24px\">\n",
+              "    <path d=\"M0 0h24v24H0V0z\" fill=\"none\"/>\n",
+              "    <path d=\"M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z\"/><path d=\"M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z\"/>\n",
+              "  </svg>\n",
+              "      </button>\n",
+              "      \n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      flex-wrap:wrap;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "      <script>\n",
+              "        const buttonEl =\n",
+              "          document.querySelector('#df-47c5ccd8-72df-4595-ac92-cfa813d3e836 button.colab-df-convert');\n",
+              "        buttonEl.style.display =\n",
+              "          google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "        async function convertToInteractive(key) {\n",
+              "          const element = document.querySelector('#df-47c5ccd8-72df-4595-ac92-cfa813d3e836');\n",
+              "          const dataTable =\n",
+              "            await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                     [key], {});\n",
+              "          if (!dataTable) return;\n",
+              "\n",
+              "          const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "            '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "            + ' to learn more about interactive tables.';\n",
+              "          element.innerHTML = '';\n",
+              "          dataTable['output_type'] = 'display_data';\n",
+              "          await google.colab.output.renderOutput(dataTable, element);\n",
+              "          const docLink = document.createElement('div');\n",
+              "          docLink.innerHTML = docLinkHtml;\n",
+              "          element.appendChild(docLink);\n",
+              "        }\n",
+              "      </script>\n",
+              "    </div>\n",
+              "  </div>\n",
+              "  "
+            ],
+            "text/plain": [
+              "           Estatura       PesoKgs\n",
+              "count  17907.000000  17907.000000\n",
+              "mean       1.812325     75.279478\n",
+              "std        0.067671      7.077378\n",
+              "min        1.550000     49.900000\n",
+              "25%        1.750000     69.850000\n",
+              "50%        1.800000     74.840000\n",
+              "75%        1.850000     79.830000\n",
+              "max        2.060000    110.220000"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 3
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Verificar si hay datos nulos ..."
+      ],
+      "metadata": {
+        "id": "AYgiXMlNngj0"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(datos['Estatura'].isnull().sum().sum())\n",
+        "print(datos['PesoKgs'].isnull().sum().sum())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "qj-O6nQHjMJV",
+        "outputId": "849c96a3-671e-4e9c-938c-cce27463181c"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "0\n",
+            "0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Mostrando los nombres de columnas y si se quisiera se puediera cambiar nombre a las columna para mejor control"
+      ],
+      "metadata": {
+        "id": "FmtR5ap4ZifL"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# datos.columns\n",
+        "# datos = datos.rename(columns={'Unnamed: 0':'X'})\n",
+        "datos.columns"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Hdz9x7y8YASD",
+        "outputId": "9b17ef08-2adf-4b38-c48e-ab2fd155e0af"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "Index(['Unnamed: 0', 'X', 'Name', 'Age', 'Nationality', 'Overall', 'Potential',\n",
+              "       'Club', 'Preferred.Foot', 'International.Reputation', 'Weak.Foot',\n",
+              "       'Skill.Moves', 'Height', 'Weight', 'Crossing', 'Finishing',\n",
+              "       'HeadingAccuracy', 'ShortPassing', 'Volleys', 'Dribbling', 'Curve',\n",
+              "       'FKAccuracy', 'LongPassing', 'BallControl', 'Acceleration',\n",
+              "       'SprintSpeed', 'Agility', 'Reactions', 'Balance', 'ShotPower',\n",
+              "       'Jumping', 'Stamina', 'Strength', 'LongShots', 'Aggression',\n",
+              "       'Interceptions', 'Positioning', 'Vision', 'Penalties', 'Composure',\n",
+              "       'Marking', 'StandingTackle', 'SlidingTackle', 'GKDiving', 'GKHandling',\n",
+              "       'GKKicking', 'GKPositioning', 'GKReflexes', 'Valor', 'Estatura',\n",
+              "       'PesoKgs'],\n",
+              "      dtype='object')"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 5
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### head()\n",
+        "Primeros 20 registros"
+      ],
+      "metadata": {
+        "id": "LVM9xEHIZwQ5"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "datos[['X', 'Name', 'Estatura', 'PesoKgs']].head(20)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 677
+        },
+        "id": "KYZ4lRLGZ49a",
+        "outputId": "a7aa1209-ce57-4822-aafd-3c667fc414b7"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "\n",
+              "  <div id=\"df-88e0e487-f4fd-4b14-a236-9fbc2028b4aa\">\n",
+              "    <div class=\"colab-df-container\">\n",
+              "      <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>X</th>\n",
+              "      <th>Name</th>\n",
+              "      <th>Estatura</th>\n",
+              "      <th>PesoKgs</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>1</td>\n",
+              "      <td>L. Messi</td>\n",
+              "      <td>1.70</td>\n",
+              "      <td>72.12</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>2</td>\n",
+              "      <td>Cristiano Ronaldo</td>\n",
+              "      <td>1.88</td>\n",
+              "      <td>83.01</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>3</td>\n",
+              "      <td>Neymar Jr</td>\n",
+              "      <td>1.75</td>\n",
+              "      <td>68.04</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>4</td>\n",
+              "      <td>De Gea</td>\n",
+              "      <td>1.93</td>\n",
+              "      <td>76.20</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>5</td>\n",
+              "      <td>K. De Bruyne</td>\n",
+              "      <td>1.80</td>\n",
+              "      <td>69.85</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5</th>\n",
+              "      <td>6</td>\n",
+              "      <td>E. Hazard</td>\n",
+              "      <td>1.73</td>\n",
+              "      <td>73.94</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>6</th>\n",
+              "      <td>7</td>\n",
+              "      <td>L. Modric</td>\n",
+              "      <td>1.73</td>\n",
+              "      <td>66.22</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>7</th>\n",
+              "      <td>8</td>\n",
+              "      <td>L. Suárez</td>\n",
+              "      <td>1.83</td>\n",
+              "      <td>86.18</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>8</th>\n",
+              "      <td>9</td>\n",
+              "      <td>Sergio Ramos</td>\n",
+              "      <td>1.83</td>\n",
+              "      <td>82.10</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>9</th>\n",
+              "      <td>10</td>\n",
+              "      <td>J. Oblak</td>\n",
+              "      <td>1.88</td>\n",
+              "      <td>87.09</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>10</th>\n",
+              "      <td>11</td>\n",
+              "      <td>R. Lewandowski</td>\n",
+              "      <td>1.83</td>\n",
+              "      <td>79.83</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>11</th>\n",
+              "      <td>12</td>\n",
+              "      <td>T. Kroos</td>\n",
+              "      <td>1.83</td>\n",
+              "      <td>76.20</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>12</th>\n",
+              "      <td>13</td>\n",
+              "      <td>D. Godín</td>\n",
+              "      <td>1.88</td>\n",
+              "      <td>78.02</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>13</th>\n",
+              "      <td>14</td>\n",
+              "      <td>David Silva</td>\n",
+              "      <td>1.73</td>\n",
+              "      <td>67.13</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>14</th>\n",
+              "      <td>15</td>\n",
+              "      <td>N. Kanté</td>\n",
+              "      <td>1.68</td>\n",
+              "      <td>72.12</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>15</th>\n",
+              "      <td>16</td>\n",
+              "      <td>P. Dybala</td>\n",
+              "      <td>1.78</td>\n",
+              "      <td>74.84</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>16</th>\n",
+              "      <td>17</td>\n",
+              "      <td>H. Kane</td>\n",
+              "      <td>1.88</td>\n",
+              "      <td>88.90</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17</th>\n",
+              "      <td>18</td>\n",
+              "      <td>A. Griezmann</td>\n",
+              "      <td>1.75</td>\n",
+              "      <td>73.03</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>18</th>\n",
+              "      <td>19</td>\n",
+              "      <td>M. ter Stegen</td>\n",
+              "      <td>1.88</td>\n",
+              "      <td>84.82</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>19</th>\n",
+              "      <td>20</td>\n",
+              "      <td>T. Courtois</td>\n",
+              "      <td>1.98</td>\n",
+              "      <td>96.16</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>\n",
+              "      <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-88e0e487-f4fd-4b14-a236-9fbc2028b4aa')\"\n",
+              "              title=\"Convert this dataframe to an interactive table.\"\n",
+              "              style=\"display:none;\">\n",
+              "        \n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "       width=\"24px\">\n",
+              "    <path d=\"M0 0h24v24H0V0z\" fill=\"none\"/>\n",
+              "    <path d=\"M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z\"/><path d=\"M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z\"/>\n",
+              "  </svg>\n",
+              "      </button>\n",
+              "      \n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      flex-wrap:wrap;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "      <script>\n",
+              "        const buttonEl =\n",
+              "          document.querySelector('#df-88e0e487-f4fd-4b14-a236-9fbc2028b4aa button.colab-df-convert');\n",
+              "        buttonEl.style.display =\n",
+              "          google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "        async function convertToInteractive(key) {\n",
+              "          const element = document.querySelector('#df-88e0e487-f4fd-4b14-a236-9fbc2028b4aa');\n",
+              "          const dataTable =\n",
+              "            await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                     [key], {});\n",
+              "          if (!dataTable) return;\n",
+              "\n",
+              "          const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "            '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "            + ' to learn more about interactive tables.';\n",
+              "          element.innerHTML = '';\n",
+              "          dataTable['output_type'] = 'display_data';\n",
+              "          await google.colab.output.renderOutput(dataTable, element);\n",
+              "          const docLink = document.createElement('div');\n",
+              "          docLink.innerHTML = docLinkHtml;\n",
+              "          element.appendChild(docLink);\n",
+              "        }\n",
+              "      </script>\n",
+              "    </div>\n",
+              "  </div>\n",
+              "  "
+            ],
+            "text/plain": [
+              "     X               Name  Estatura  PesoKgs\n",
+              "0    1           L. Messi      1.70    72.12\n",
+              "1    2  Cristiano Ronaldo      1.88    83.01\n",
+              "2    3          Neymar Jr      1.75    68.04\n",
+              "3    4             De Gea      1.93    76.20\n",
+              "4    5       K. De Bruyne      1.80    69.85\n",
+              "5    6          E. Hazard      1.73    73.94\n",
+              "6    7          L. Modric      1.73    66.22\n",
+              "7    8          L. Suárez      1.83    86.18\n",
+              "8    9       Sergio Ramos      1.83    82.10\n",
+              "9   10           J. Oblak      1.88    87.09\n",
+              "10  11     R. Lewandowski      1.83    79.83\n",
+              "11  12           T. Kroos      1.83    76.20\n",
+              "12  13           D. Godín      1.88    78.02\n",
+              "13  14        David Silva      1.73    67.13\n",
+              "14  15           N. Kanté      1.68    72.12\n",
+              "15  16          P. Dybala      1.78    74.84\n",
+              "16  17            H. Kane      1.88    88.90\n",
+              "17  18       A. Griezmann      1.75    73.03\n",
+              "18  19      M. ter Stegen      1.88    84.82\n",
+              "19  20        T. Courtois      1.98    96.16"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 6
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## tail() \n",
+        "Últimos 20 registros"
+      ],
+      "metadata": {
+        "id": "fkT0RPXJZ3DZ"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "datos[['X', 'Name', 'Estatura', 'PesoKgs']].tail(20)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 677
+        },
+        "id": "nh1E5BU7aLbR",
+        "outputId": "b11ec7b2-4d1e-4eb5-f035-925a6e093a95"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "\n",
+              "  <div id=\"df-63cecf5e-1a0f-4ef2-b93a-b6c718971673\">\n",
+              "    <div class=\"colab-df-container\">\n",
+              "      <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>X</th>\n",
+              "      <th>Name</th>\n",
+              "      <th>Estatura</th>\n",
+              "      <th>PesoKgs</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>17887</th>\n",
+              "      <td>17936</td>\n",
+              "      <td>C. Ehlich</td>\n",
+              "      <td>1.78</td>\n",
+              "      <td>73.03</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17888</th>\n",
+              "      <td>17937</td>\n",
+              "      <td>L. Collins</td>\n",
+              "      <td>1.78</td>\n",
+              "      <td>67.13</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17889</th>\n",
+              "      <td>17938</td>\n",
+              "      <td>A. Kaltner</td>\n",
+              "      <td>1.78</td>\n",
+              "      <td>74.84</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17890</th>\n",
+              "      <td>17939</td>\n",
+              "      <td>L. Watkins</td>\n",
+              "      <td>1.75</td>\n",
+              "      <td>79.83</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17891</th>\n",
+              "      <td>17940</td>\n",
+              "      <td>J. Norville-Williams</td>\n",
+              "      <td>1.80</td>\n",
+              "      <td>76.20</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17892</th>\n",
+              "      <td>17941</td>\n",
+              "      <td>S. Squire</td>\n",
+              "      <td>1.85</td>\n",
+              "      <td>74.84</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17893</th>\n",
+              "      <td>17942</td>\n",
+              "      <td>N. Fuentes</td>\n",
+              "      <td>1.73</td>\n",
+              "      <td>66.22</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17894</th>\n",
+              "      <td>17943</td>\n",
+              "      <td>J. Milli</td>\n",
+              "      <td>1.91</td>\n",
+              "      <td>84.82</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17895</th>\n",
+              "      <td>17944</td>\n",
+              "      <td>S. Griffin</td>\n",
+              "      <td>1.73</td>\n",
+              "      <td>63.96</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17896</th>\n",
+              "      <td>17945</td>\n",
+              "      <td>K. Fujikawa</td>\n",
+              "      <td>1.70</td>\n",
+              "      <td>66.22</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17897</th>\n",
+              "      <td>17946</td>\n",
+              "      <td>D. Holland</td>\n",
+              "      <td>1.78</td>\n",
+              "      <td>63.96</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17898</th>\n",
+              "      <td>17947</td>\n",
+              "      <td>J. Livesey</td>\n",
+              "      <td>1.80</td>\n",
+              "      <td>69.85</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17899</th>\n",
+              "      <td>17948</td>\n",
+              "      <td>M. Baldisimo</td>\n",
+              "      <td>1.68</td>\n",
+              "      <td>68.04</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17900</th>\n",
+              "      <td>17949</td>\n",
+              "      <td>J. Young</td>\n",
+              "      <td>1.75</td>\n",
+              "      <td>71.21</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17901</th>\n",
+              "      <td>17950</td>\n",
+              "      <td>D. Walsh</td>\n",
+              "      <td>1.85</td>\n",
+              "      <td>76.20</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17902</th>\n",
+              "      <td>17951</td>\n",
+              "      <td>J. Lundstram</td>\n",
+              "      <td>1.75</td>\n",
+              "      <td>60.78</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17903</th>\n",
+              "      <td>17952</td>\n",
+              "      <td>N. Christoffersson</td>\n",
+              "      <td>1.91</td>\n",
+              "      <td>77.11</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17904</th>\n",
+              "      <td>17953</td>\n",
+              "      <td>B. Worman</td>\n",
+              "      <td>1.73</td>\n",
+              "      <td>67.13</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17905</th>\n",
+              "      <td>17954</td>\n",
+              "      <td>D. Walker-Rice</td>\n",
+              "      <td>1.78</td>\n",
+              "      <td>69.85</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17906</th>\n",
+              "      <td>17955</td>\n",
+              "      <td>G. Nugent</td>\n",
+              "      <td>1.78</td>\n",
+              "      <td>79.83</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>\n",
+              "      <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-63cecf5e-1a0f-4ef2-b93a-b6c718971673')\"\n",
+              "              title=\"Convert this dataframe to an interactive table.\"\n",
+              "              style=\"display:none;\">\n",
+              "        \n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "       width=\"24px\">\n",
+              "    <path d=\"M0 0h24v24H0V0z\" fill=\"none\"/>\n",
+              "    <path d=\"M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z\"/><path d=\"M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z\"/>\n",
+              "  </svg>\n",
+              "      </button>\n",
+              "      \n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      flex-wrap:wrap;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "      <script>\n",
+              "        const buttonEl =\n",
+              "          document.querySelector('#df-63cecf5e-1a0f-4ef2-b93a-b6c718971673 button.colab-df-convert');\n",
+              "        buttonEl.style.display =\n",
+              "          google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "        async function convertToInteractive(key) {\n",
+              "          const element = document.querySelector('#df-63cecf5e-1a0f-4ef2-b93a-b6c718971673');\n",
+              "          const dataTable =\n",
+              "            await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                     [key], {});\n",
+              "          if (!dataTable) return;\n",
+              "\n",
+              "          const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "            '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "            + ' to learn more about interactive tables.';\n",
+              "          element.innerHTML = '';\n",
+              "          dataTable['output_type'] = 'display_data';\n",
+              "          await google.colab.output.renderOutput(dataTable, element);\n",
+              "          const docLink = document.createElement('div');\n",
+              "          docLink.innerHTML = docLinkHtml;\n",
+              "          element.appendChild(docLink);\n",
+              "        }\n",
+              "      </script>\n",
+              "    </div>\n",
+              "  </div>\n",
+              "  "
+            ],
+            "text/plain": [
+              "           X                  Name  Estatura  PesoKgs\n",
+              "17887  17936             C. Ehlich      1.78    73.03\n",
+              "17888  17937            L. Collins      1.78    67.13\n",
+              "17889  17938            A. Kaltner      1.78    74.84\n",
+              "17890  17939            L. Watkins      1.75    79.83\n",
+              "17891  17940  J. Norville-Williams      1.80    76.20\n",
+              "17892  17941             S. Squire      1.85    74.84\n",
+              "17893  17942            N. Fuentes      1.73    66.22\n",
+              "17894  17943              J. Milli      1.91    84.82\n",
+              "17895  17944            S. Griffin      1.73    63.96\n",
+              "17896  17945           K. Fujikawa      1.70    66.22\n",
+              "17897  17946            D. Holland      1.78    63.96\n",
+              "17898  17947            J. Livesey      1.80    69.85\n",
+              "17899  17948          M. Baldisimo      1.68    68.04\n",
+              "17900  17949              J. Young      1.75    71.21\n",
+              "17901  17950              D. Walsh      1.85    76.20\n",
+              "17902  17951          J. Lundstram      1.75    60.78\n",
+              "17903  17952    N. Christoffersson      1.91    77.11\n",
+              "17904  17953             B. Worman      1.73    67.13\n",
+              "17905  17954        D. Walker-Rice      1.78    69.85\n",
+              "17906  17955             G. Nugent      1.78    79.83"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 7
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Partir datos en datos de entrenamiento y datos de validación"
+      ],
+      "metadata": {
+        "id": "xkhGh8g_Vpi7"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Las variables de interés serán Estaura y PesoKgs  de los datos de entrenamiento. \n",
+        "\n",
+        "De las dos variables de interés, Estatura y PesoKgs se determina que la variable predictora es Estatura y el PesoKgs es la variable de respuesta o también:\n",
+        "\n",
+        "* Estatura es variable independiente y\n",
+        "\n",
+        "* PesoKgs es variable dependiente\n",
+        "\n",
+        "* Es decir, la variable PesoKgs depende de la Estatura\n",
+        "Con la función loc[:'atributo'] se eligen las variables de interés del conjunto de datos\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "5HyFYeOmWjkn"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "\n",
+        "# estatura = datos.loc[:, 'Estatura'].values\n",
+        "# pesokgs = datos.loc[:, 'PesoKgs'].values\n"
+      ],
+      "metadata": {
+        "id": "PEFiTY_yVu3o"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Preparando los datos con función array.reshape(-1, 1). -1, 1 significa que son todos los datos de un arreglo de una dimensión."
+      ],
+      "metadata": {
+        "id": "wixil7tUdFXq"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# estatura = datos[['Estatura']].reshape(-1, 1)\n",
+        "# pesokgs = pesokgs.reshape(-1, 1)\n",
+        "\n",
+        "estatura = datos[['Estatura']].to_numpy()\n",
+        "pesokgs = datos[['PesoKgs']].to_numpy()\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "tbFE9y6odI8S"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### Datos de entrenamiento y datos de validación (test)\n",
+        "\n",
+        "*   Elemento de la lista\n",
+        "*   Elemento de la lista\n",
+        "\n",
+        "\n",
+        "\n",
+        "Ahora que se tiene la variable independiente estarur y la variable dependiente pesokgs, el siguiente paso es dividir estos datos en conjuntos de entrenamiento y prueba o validación.\n",
+        "\n",
+        "Se utiiza el método *train_test_split()* que forma parte de la librería Scikit-Learn.\n",
+        "\n",
+        "El argumento test_size establece el 30% para datos de validación por lo que el 70% pertenece a los datos de entrenamiento"
+      ],
+      "metadata": {
+        "id": "RvR-3YAuafup"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "estatura_train, estatura_test, pesokgs_train, pesokgs_test = train_test_split(estatura, pesokgs, test_size=0.3, random_state=421)\n"
+      ],
+      "metadata": {
+        "id": "YKsW7QBpanPo"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Creando el modelo\n",
+        "\n",
+        "Se construirá el modelo usando *LinearRegression a partir* de la librería *sklearn.linear_model* con los datos de entrenamiento "
+      ],
+      "metadata": {
+        "id": "Gl5VpsiicCux"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "estatura_train"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "aVgJxtqmigeC",
+        "outputId": "4250eeb1-8a0a-4152-e444-44a034650f48"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([[1.88],\n",
+              "       [1.78],\n",
+              "       [1.88],\n",
+              "       ...,\n",
+              "       [1.75],\n",
+              "       [1.88],\n",
+              "       [1.91]])"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 12
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "modelo = LinearRegression()\n",
+        "modelo.fit(estatura_train, pesokgs_train)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Uox3Ecz9cIds",
+        "outputId": "bea69164-f336-46fe-d9c1-bf71e869a5b5"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "LinearRegression()"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 13
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### Dispersión de los datos\n",
+        "Dispersión de los datos de entrenamiento construeno la linea de tendencia y haciendo un diagrama de dispersión con las variables estatura y peso de los datos de entrenamiento."
+      ],
+      "metadata": {
+        "id": "xnC6kx47cjAR"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "linea_tendencia = modelo.predict(estatura_train)\n",
+        "plt.plot(estatura_train, pesokgs_train, 'o', color= 'blue')\n",
+        "plt.plot(estatura_train, linea_tendencia, color=\"red\")\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 282
+        },
+        "id": "-WYoSjYqc5xw",
+        "outputId": "2b50b2c3-1427-403e-cac6-bfd322eee959"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[<matplotlib.lines.Line2D at 0x7f0ceab1c890>]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 14
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### Coeficientes\n",
+        "\n",
+        "$$\n",
+        "Y = a + bx\n",
+        "$$\n",
+        "\n",
+        "ó \n",
+        "\n",
+        "$$\n",
+        "Y = \\beta_0 + \\beta_1\\cdot x\n",
+        "$$\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "Vf_li9VdoTxk"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "a = modelo.intercept_\n",
+        "b = modelo.coef_\n",
+        "\n",
+        "print(\"Valor de a: \", a)\n",
+        "print(\"Valor de b; \", b)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "_zOfpoUnoicl",
+        "outputId": "0b2d0739-86ca-49a5-fe18-9465f8ae5a31"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Valor de a:  [-68.66661314]\n",
+            "Valor de b;  [[79.42857258]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Predicciones \n",
+        "\n",
+        "Las predicciones se hacen con el conjunto de datos de validación."
+      ],
+      "metadata": {
+        "id": "rgwFpv2go_el"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "predicciones = modelo.predict(estatura_test)\n",
+        "predicciones"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "-4YCKt3ApILr",
+        "outputId": "ea34f75d-5810-4f94-f324-cc5cc62a57f4"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([[84.63053195],\n",
+              "       [76.68767469],\n",
+              "       [76.68767469],\n",
+              "       ...,\n",
+              "       [78.27624614],\n",
+              "       [78.27624614],\n",
+              "       [78.27624614]])"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 16
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "pesokgs_test"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "MU33gIqVqbzO",
+        "outputId": "981badaa-038a-4159-8094-68bfaf0a4d55"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([[83.01],\n",
+              "       [78.93],\n",
+              "       [83.01],\n",
+              "       ...,\n",
+              "       [82.1 ],\n",
+              "       [87.09],\n",
+              "       [77.11]])"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 17
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Crear un *data.frame* llamado *comparaciones* a partir de la creación de un diccionario con los valores reales del conjunto de entrenamiento y las predicciones calculadas. \n",
+        "\n",
+        "Con la función *flatten().tolist()* convierte el arreglo a una lista de una dimensión.\n"
+      ],
+      "metadata": {
+        "id": "AAz9UQ7ppaXU"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "diccionario = {'Estatura': estatura_test.flatten().tolist(),\n",
+        "                'Real' : pesokgs_test.flatten().tolist(), \n",
+        "               'Predicho' : predicciones.flatten().tolist()}\n",
+        "diccionario\n",
+        "\n",
+        "comparaciones = pd.DataFrame(diccionario)\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "vNX-fk0EphtU"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "comparaciones.head(20)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 677
+        },
+        "id": "dzGgHdXZ18kP",
+        "outputId": "2d27766f-7c6f-469d-b610-d81d47114f6a"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "\n",
+              "  <div id=\"df-63c49bc9-4b48-4b0c-9503-8b6af80690ae\">\n",
+              "    <div class=\"colab-df-container\">\n",
+              "      <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Estatura</th>\n",
+              "      <th>Real</th>\n",
+              "      <th>Predicho</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>1.93</td>\n",
+              "      <td>83.01</td>\n",
+              "      <td>84.630532</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>1.83</td>\n",
+              "      <td>78.93</td>\n",
+              "      <td>76.687675</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>1.83</td>\n",
+              "      <td>83.01</td>\n",
+              "      <td>76.687675</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>1.75</td>\n",
+              "      <td>73.94</td>\n",
+              "      <td>70.333389</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>1.73</td>\n",
+              "      <td>73.03</td>\n",
+              "      <td>68.744817</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5</th>\n",
+              "      <td>1.83</td>\n",
+              "      <td>82.10</td>\n",
+              "      <td>76.687675</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>6</th>\n",
+              "      <td>1.88</td>\n",
+              "      <td>73.94</td>\n",
+              "      <td>80.659103</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>7</th>\n",
+              "      <td>1.88</td>\n",
+              "      <td>89.81</td>\n",
+              "      <td>80.659103</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>8</th>\n",
+              "      <td>1.88</td>\n",
+              "      <td>84.82</td>\n",
+              "      <td>80.659103</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>9</th>\n",
+              "      <td>1.88</td>\n",
+              "      <td>73.94</td>\n",
+              "      <td>80.659103</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>10</th>\n",
+              "      <td>1.70</td>\n",
+              "      <td>68.95</td>\n",
+              "      <td>66.361960</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>11</th>\n",
+              "      <td>1.85</td>\n",
+              "      <td>73.94</td>\n",
+              "      <td>78.276246</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>12</th>\n",
+              "      <td>1.80</td>\n",
+              "      <td>73.94</td>\n",
+              "      <td>74.304818</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>13</th>\n",
+              "      <td>1.93</td>\n",
+              "      <td>83.91</td>\n",
+              "      <td>84.630532</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>14</th>\n",
+              "      <td>1.98</td>\n",
+              "      <td>82.10</td>\n",
+              "      <td>88.601961</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>15</th>\n",
+              "      <td>1.83</td>\n",
+              "      <td>76.20</td>\n",
+              "      <td>76.687675</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>16</th>\n",
+              "      <td>1.88</td>\n",
+              "      <td>89.81</td>\n",
+              "      <td>80.659103</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>17</th>\n",
+              "      <td>1.85</td>\n",
+              "      <td>78.02</td>\n",
+              "      <td>78.276246</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>18</th>\n",
+              "      <td>1.85</td>\n",
+              "      <td>77.11</td>\n",
+              "      <td>78.276246</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>19</th>\n",
+              "      <td>1.75</td>\n",
+              "      <td>66.22</td>\n",
+              "      <td>70.333389</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>\n",
+              "      <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-63c49bc9-4b48-4b0c-9503-8b6af80690ae')\"\n",
+              "              title=\"Convert this dataframe to an interactive table.\"\n",
+              "              style=\"display:none;\">\n",
+              "        \n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "       width=\"24px\">\n",
+              "    <path d=\"M0 0h24v24H0V0z\" fill=\"none\"/>\n",
+              "    <path d=\"M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z\"/><path d=\"M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z\"/>\n",
+              "  </svg>\n",
+              "      </button>\n",
+              "      \n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      flex-wrap:wrap;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "      <script>\n",
+              "        const buttonEl =\n",
+              "          document.querySelector('#df-63c49bc9-4b48-4b0c-9503-8b6af80690ae button.colab-df-convert');\n",
+              "        buttonEl.style.display =\n",
+              "          google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "        async function convertToInteractive(key) {\n",
+              "          const element = document.querySelector('#df-63c49bc9-4b48-4b0c-9503-8b6af80690ae');\n",
+              "          const dataTable =\n",
+              "            await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                     [key], {});\n",
+              "          if (!dataTable) return;\n",
+              "\n",
+              "          const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "            '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "            + ' to learn more about interactive tables.';\n",
+              "          element.innerHTML = '';\n",
+              "          dataTable['output_type'] = 'display_data';\n",
+              "          await google.colab.output.renderOutput(dataTable, element);\n",
+              "          const docLink = document.createElement('div');\n",
+              "          docLink.innerHTML = docLinkHtml;\n",
+              "          element.appendChild(docLink);\n",
+              "        }\n",
+              "      </script>\n",
+              "    </div>\n",
+              "  </div>\n",
+              "  "
+            ],
+            "text/plain": [
+              "    Estatura   Real   Predicho\n",
+              "0       1.93  83.01  84.630532\n",
+              "1       1.83  78.93  76.687675\n",
+              "2       1.83  83.01  76.687675\n",
+              "3       1.75  73.94  70.333389\n",
+              "4       1.73  73.03  68.744817\n",
+              "5       1.83  82.10  76.687675\n",
+              "6       1.88  73.94  80.659103\n",
+              "7       1.88  89.81  80.659103\n",
+              "8       1.88  84.82  80.659103\n",
+              "9       1.88  73.94  80.659103\n",
+              "10      1.70  68.95  66.361960\n",
+              "11      1.85  73.94  78.276246\n",
+              "12      1.80  73.94  74.304818\n",
+              "13      1.93  83.91  84.630532\n",
+              "14      1.98  82.10  88.601961\n",
+              "15      1.83  76.20  76.687675\n",
+              "16      1.88  89.81  80.659103\n",
+              "17      1.85  78.02  78.276246\n",
+              "18      1.85  77.11  78.276246\n",
+              "19      1.75  66.22  70.333389"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 19
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "comparaciones.tail(20)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 677
+        },
+        "id": "Y02BrDUV1-zv",
+        "outputId": "7073e58a-8e1c-4e07-991d-2ad0fdacc3d4"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "\n",
+              "  <div id=\"df-0f47df94-308a-42a1-82cb-1806f234b2e5\">\n",
+              "    <div class=\"colab-df-container\">\n",
+              "      <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Estatura</th>\n",
+              "      <th>Real</th>\n",
+              "      <th>Predicho</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>5353</th>\n",
+              "      <td>1.70</td>\n",
+              "      <td>69.85</td>\n",
+              "      <td>66.361960</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5354</th>\n",
+              "      <td>1.83</td>\n",
+              "      <td>72.12</td>\n",
+              "      <td>76.687675</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5355</th>\n",
+              "      <td>1.88</td>\n",
+              "      <td>83.91</td>\n",
+              "      <td>80.659103</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5356</th>\n",
+              "      <td>1.83</td>\n",
+              "      <td>91.17</td>\n",
+              "      <td>76.687675</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5357</th>\n",
+              "      <td>1.83</td>\n",
+              "      <td>74.84</td>\n",
+              "      <td>76.687675</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5358</th>\n",
+              "      <td>1.83</td>\n",
+              "      <td>77.11</td>\n",
+              "      <td>76.687675</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5359</th>\n",
+              "      <td>1.68</td>\n",
+              "      <td>73.03</td>\n",
+              "      <td>64.773389</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5360</th>\n",
+              "      <td>1.98</td>\n",
+              "      <td>88.00</td>\n",
+              "      <td>88.601961</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5361</th>\n",
+              "      <td>1.65</td>\n",
+              "      <td>64.86</td>\n",
+              "      <td>62.390532</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5362</th>\n",
+              "      <td>1.70</td>\n",
+              "      <td>59.87</td>\n",
+              "      <td>66.361960</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5363</th>\n",
+              "      <td>1.73</td>\n",
+              "      <td>66.22</td>\n",
+              "      <td>68.744817</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5364</th>\n",
+              "      <td>1.85</td>\n",
+              "      <td>77.11</td>\n",
+              "      <td>78.276246</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5365</th>\n",
+              "      <td>1.68</td>\n",
+              "      <td>60.78</td>\n",
+              "      <td>64.773389</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5366</th>\n",
+              "      <td>1.85</td>\n",
+              "      <td>79.83</td>\n",
+              "      <td>78.276246</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5367</th>\n",
+              "      <td>1.83</td>\n",
+              "      <td>74.84</td>\n",
+              "      <td>76.687675</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5368</th>\n",
+              "      <td>1.88</td>\n",
+              "      <td>74.84</td>\n",
+              "      <td>80.659103</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5369</th>\n",
+              "      <td>1.85</td>\n",
+              "      <td>81.19</td>\n",
+              "      <td>78.276246</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5370</th>\n",
+              "      <td>1.85</td>\n",
+              "      <td>82.10</td>\n",
+              "      <td>78.276246</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5371</th>\n",
+              "      <td>1.85</td>\n",
+              "      <td>87.09</td>\n",
+              "      <td>78.276246</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5372</th>\n",
+              "      <td>1.85</td>\n",
+              "      <td>77.11</td>\n",
+              "      <td>78.276246</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>\n",
+              "      <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-0f47df94-308a-42a1-82cb-1806f234b2e5')\"\n",
+              "              title=\"Convert this dataframe to an interactive table.\"\n",
+              "              style=\"display:none;\">\n",
+              "        \n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "       width=\"24px\">\n",
+              "    <path d=\"M0 0h24v24H0V0z\" fill=\"none\"/>\n",
+              "    <path d=\"M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z\"/><path d=\"M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z\"/>\n",
+              "  </svg>\n",
+              "      </button>\n",
+              "      \n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      flex-wrap:wrap;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "      <script>\n",
+              "        const buttonEl =\n",
+              "          document.querySelector('#df-0f47df94-308a-42a1-82cb-1806f234b2e5 button.colab-df-convert');\n",
+              "        buttonEl.style.display =\n",
+              "          google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "        async function convertToInteractive(key) {\n",
+              "          const element = document.querySelector('#df-0f47df94-308a-42a1-82cb-1806f234b2e5');\n",
+              "          const dataTable =\n",
+              "            await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                     [key], {});\n",
+              "          if (!dataTable) return;\n",
+              "\n",
+              "          const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "            '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "            + ' to learn more about interactive tables.';\n",
+              "          element.innerHTML = '';\n",
+              "          dataTable['output_type'] = 'display_data';\n",
+              "          await google.colab.output.renderOutput(dataTable, element);\n",
+              "          const docLink = document.createElement('div');\n",
+              "          docLink.innerHTML = docLinkHtml;\n",
+              "          element.appendChild(docLink);\n",
+              "        }\n",
+              "      </script>\n",
+              "    </div>\n",
+              "  </div>\n",
+              "  "
+            ],
+            "text/plain": [
+              "      Estatura   Real   Predicho\n",
+              "5353      1.70  69.85  66.361960\n",
+              "5354      1.83  72.12  76.687675\n",
+              "5355      1.88  83.91  80.659103\n",
+              "5356      1.83  91.17  76.687675\n",
+              "5357      1.83  74.84  76.687675\n",
+              "5358      1.83  77.11  76.687675\n",
+              "5359      1.68  73.03  64.773389\n",
+              "5360      1.98  88.00  88.601961\n",
+              "5361      1.65  64.86  62.390532\n",
+              "5362      1.70  59.87  66.361960\n",
+              "5363      1.73  66.22  68.744817\n",
+              "5364      1.85  77.11  78.276246\n",
+              "5365      1.68  60.78  64.773389\n",
+              "5366      1.85  79.83  78.276246\n",
+              "5367      1.83  74.84  76.687675\n",
+              "5368      1.88  74.84  80.659103\n",
+              "5369      1.85  81.19  78.276246\n",
+              "5370      1.85  82.10  78.276246\n",
+              "5371      1.85  87.09  78.276246\n",
+              "5372      1.85  77.11  78.276246"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 20
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Evaluando el modelo\n",
+        "\n",
+        "Se evalúa el modelo de regresión lineal simple: \n",
+        "\n",
+        "$$\n",
+        "MAE = Pendiente ...\n",
+        "$$\n",
+        "\n",
+        "$$\n",
+        "MSE = \\frac{\\sum(predicho_i - real_i)^{2}}{n}\n",
+        "$$\n",
+        "\n",
+        "$$\n",
+        "RMSE = \\sqrt{\\frac{\\sum(predicho_i - real_i)^{2}}{n}}\n",
+        "$$\n",
+        "\n",
+        "$$\n",
+        "\\text{Multipel R Squared } = R^2 = cor(x, y)^2 \\text{; de Pearson}\n",
+        "$$\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "hAtG181me8FZ"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print('Mean Absolute Error: MAE', metrics.mean_absolute_error(pesokgs_test, predicciones))\n",
+        "print('Mean Squared Error: MSE', metrics.mean_squared_error(pesokgs_test, predicciones))\n",
+        "print('Root Mean Squared Error RMSE:', np.sqrt(metrics.mean_squared_error(pesokgs_test, predicciones)))\n",
+        "\n",
+        "r = np.corrcoef(estatura_train.flatten().tolist(), pesokgs_train.flatten().tolist())\n",
+        "r = r ** 2\n",
+        "r = r.reshape(-1,2)\n",
+        "r = r[0, 1]\n",
+        "print('Multiple R Square :', np.round(r, 4) )\n",
+        "\n",
+        "\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "kfiq2hiAfD29",
+        "outputId": "b551f67e-6bf8-4700-d00c-b2b6f85daf23"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mean Absolute Error: MAE 3.630688528691699\n",
+            "Mean Squared Error: MSE 21.767950064390153\n",
+            "Root Mean Squared Error RMSE: 4.6656135785542885\n",
+            "Multiple R Square : 0.572\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# Interpretación\n",
+        "\n",
+        "El análisis de datos que hicimos fue con el conjunto de datos de FIFA. Los datos se encuentran en la dirección \"https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/datos.limpios.csv\" y fue de los datos de fifa pero aun mas limpios. Nuestro propósito fue hacer una regresión lineal simple con estos datos. La variable independiente en este análisis es estatura de un jugador y la variable dependiente es PesoKgs que será Valor en formato numérico. Realizamos la correlación entre estaos 2 datos y nos dio el resultado en **\"RMSE 4.6656135785542885\"** en este caso realizando el analisis en python lo cual tambien nos indica que es una correlacion positiva considerable. El valor Multiple R-squared es 0.572. Podemos decir que para la correlacion de los valores, el Valor de **\"a: -68.66661314\"** y el\n",
+        "Valor de **\"b; 79.42857258\"**, para este caso significa que se hubiera establecido el modelo en el cual se acepta si hay un 70% o mas . El valor de la variable Estatura representa tan solo el **\"57.2%\"** del valor del PesoKgs. Entonces la variable predictiva Estatura si son altamente y estadísticamente significativas por debajo del 0.001 o con un nivel de confianza mayor al 99.9% El modelo predice positivamente considerable como se ve en la correlacion, hay probabilidad que otra variable tenga más relación con el Peso para tener un índice mayor de correlación. La diferencia es que hay mayor indice de correlacion.\n",
+        "Pero en este caso los datos cambiaron ya que modifique la semilla por mi numero de control, son los ultimos 4 digitos el cual fue \"0421\", en este caso el valor del 0, no lo reconoce, entonces solo se dejo como semilla \"421\", puede afectar un poco el analisis ya que solo son 3 digitos con los cuales se hizo la comparacion, podemos decir que si cambiaron notablemente los valores registrados sobre todo en **\"Multiple R Square : 0.572\"**"
+      ],
+      "metadata": {
+        "id": "RbWG_TMifWK6"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# Bibliografía\n",
+        "\n",
+        "[https://pharos.sh/regresion-lineal-en-python-con-scikit-learn/](https://pharos.sh/regresion-lineal-en-python-con-scikit-learn/)"
+      ],
+      "metadata": {
+        "id": "rUULD4RtetkE"
+      }
+    }
+  ]
+}
