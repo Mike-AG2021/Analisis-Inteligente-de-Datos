@@ -1,0 +1,237 @@
+---
+title: "Caso 3. Regresión Lineal Múltiple de ventas por inversión en publicidad. Adverstising"
+author: Jesús Miguel Acosta Gurrola
+data: 16/03/2022
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    toc_depth: 6
+    number_sections: yes
+---
+
+# Objetivo
+
+Construir y evaluar un modelo de regresión lineal múltiple para realizar predicciones.
+
+# Descripción
+
+-   Se cargan las librerías necesarias
+
+-   Se cargan los datos Se exploran los datos
+
+-   Se crear los datos de entrenamiento y validación 70% y 30% respectivamente
+
+Las métricas a valorar serán:
+
+-   Que los coeficientes sean estadísticamente significativos por encima del 95%.
+
+-   *R Squared Ajustado* el modelo se acepta si sobrepasa en el 80%
+
+-   *rmse* comparado con otro modelo mismos datos se acepta o se establece que un modelo es mejor que otro.
+
+# Marco teórico
+
+En la mayoría de los problemas de investigación en los que se aplica el análisis de regresión se necesita más de una variable independiente para el modelo de regresión. La complejidad de la mayoría de mecanismos científicos es tal que, con el fin de predecir una respuesta importante, se requiere un modelo de regresión múltiple. Cuando un modelo es lineal en los coeficientes se denomina modelo de regresión lineal múltiple. Para el caso de k variables independientes, el modelo que da $x_1, x_2,…, x_k,$ y $y$ como la variable dependiente. $x_1, x_,..., x_k$ son las variable s que afectan a la variable dependiente en el modelo de regresión lineal múltiple. (Walpole, Myers, and Myers 2012a)
+
+Muchos problemas de de investigación y de la industria, requieren la estimación de las relaciones existentes entre el patrón de variabilidad de una variable aleatoria y los valores de una o más variables aleatorias. (Urrutia Mosquera 2011)
+
+Al generar un modelo de regresión lineal múltiple es importante identificar los estadísticos de R2, que se denomina coeficiente de determinación y es una medida de la proporción de la variabilidad explicada por el modelo ajustado.
+
+De igual forma, el valor de R2 ajustado o coeficiente de determinación ajustado, es una variación de R2 que proporciona un ajuste para los grados de libertad (Walpole, Myers, and Myers 2012b). R Ajustado está diseñado para proporcionar un estadístico que castigue un modelo sobreajustado, de manera que se puede esperar que favorezca al modelo.(Walpole, Myers, and Myers 2012c).
+
+Una variable YY puede predecirse conforme y de cuerdo con
+
+$$
+y = b_0 + b_1{x_1} + b_2{x_2} + b_3{x_3}+ .....b_k{x_k}
+$$
+
+# Desarrollo
+
+## Cargar librerías
+
+```{r warning=FALSE, message=FALSE}
+library(readr) # Para importar datos
+library(dplyr) # Para filtrar   
+library(knitr) # Para datos tabulares
+library(ggplot2) # Para visualizar
+library(plotly)
+library(caret)  # Para particionar
+library(Metrics) # Para determinar rmse
+```
+
+## Cargar datos
+
+```{r}
+datos <- read.csv("https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/Advertising.csv")
+```
+
+## Explorando los datos
+
+```{r}
+summary(datos)
+```
+
+```{r}
+str(datos)
+```
+
+Son 200 registros tres variables independientes y una variable dependiente.
+
+La variable dependiente o variable objetivo es *Sales* que deberá estar en función de la inversión que se hace en *TV*, *Radio* o *Newspaper*.
+
+## Limpiar datos
+
+Quitar la variable x que no es de interés
+
+```{r}
+datos <- datos %>%
+  select (TV, Radio, Newspaper, Sales)
+```
+
+### head(datos)
+
+```{r}
+kable(head(datos, 20), caption = "Primeros 20 registros")
+
+```
+
+### tail(datos)
+
+```{r}
+kable(tail(datos, 20), caption = "Últimos 20 registros")
+
+```
+
+## Datos de entrenamiento y validación
+
+### Datos de entrenamiento
+
+```{r}
+n <- nrow(datos)
+
+# Modificar la semilla estableciendo como parámetro los útimos cuatro dígitos de su no de control. 
+# Ej. set.seed(0732), o set.seed(1023)
+# set.seed(2022) 
+set.seed(0421)
+```
+
+De manera aleatoria se construyen los datos de entrenamiento y los datos de validación.
+
+En la variable *entrena* se generan los registros que van a ser los datos de entrenamiento, de tal forma que los datos de validación serán los que no sena de entrenamiento [-*entrena*].
+
+```{r}
+entrena <- createDataPartition(y = datos$Sales, p = 0.70, list = FALSE, times = 1)
+
+# Datos entrenamiento
+datos.entrenamiento <- datos[entrena, ]  # [renglones, columna]
+
+# Datos validación
+datos.validacion <- datos[-entrena, ]
+```
+
+#### head()
+
+```{r}
+kable(head(datos.entrenamiento, 20), caption = "Datos de Entrenamiento. Primeros 20 registros")
+```
+
+#### tail()
+
+```{r}
+kable(tail(datos.entrenamiento, 20), caption = "Datos de entrenamiento ültimos 20 registros")
+```
+
+### Datos de validación
+
+Los datos de validación deben ser diferentes a los datos den entrenamiento.
+
+#### head()
+
+```{r}
+kable(head(datos.validacion, 20), caption = "Datos de Validación Primeros 20 registros")
+
+```
+
+#### tail()
+
+```{r}
+kable(tail(datos.validacion, 20), caption = "Datos de validació últimos 20 registros")
+```
+
+## Construir el modelo
+
+El modelo se construye con la función lm() en donde participa en la fórmula que la variable *Sales* (*Sales \~ TV + Radio + Newspaper)* está en función de las variables independientes del conjunto de datos de entrenamiento.
+
+```{r}
+modelo.rm <- lm(data = datos.entrenamiento, formula = Sales ~ TV + Radio + Newspaper)
+modelo.rm
+```
+
+### Summary modelo
+
+```{r}
+summary(modelo.rm)
+```
+
+Con respecto a los coeficientes se observa que todos tienen un nivel de confianza por encima del 99% excepto la variable *Newspaper*.
+
+Con respecto a la métrica R Square y R Square ajustada, se tiene: Multiple R-squared: 0.8932, Adjusted R-squared: 0.8909 que está por encima del 80% por lo que se acepta el modelo.
+
+## Predicciones
+
+Las predicciones de las ventas '*Sales*' matemáticamente serían:
+
+$Sales = 2.620e00 + 4.809e-02\cdot{TV} + 1.873e-01\cdot{Radio} + 4.830e-06\cdot{Newspaper}$ Se hará predicciones con la función *predict()* utilizando para ello los datos de validación, luego se observará la diferencia que existe entre los datos reales con los datos de predichos determinando el *Root Mean Standar Error* (rmse), la raiz del error estándar medio es decir, la deferencia entre los valores predichos y los reales estadísticamente.
+
+Se hace un *data.frame* de comparaciones con lo cual se presentan los valores reales y los valores de las predicciones. Se presenta solo las primeras 20 y últimas 20 predicciones.
+
+```{r}
+predicciones <- predict(object = modelo.rm, newdata = datos.validacion)
+
+comparaciones <- data.frame(datos.validacion, predicciones)
+```
+
+### head()
+
+```{r}
+kable(x = head(comparaciones, 20), caption = "Predicciones")
+```
+
+### tail()
+
+```{r}
+kable(x = head(comparaciones, 20), caption = "Predicciones")
+```
+
+### Valores Reales Sales Vs Prediciones
+
+```{r}
+ggplot(data = comparaciones) +
+  geom_line(aes(x = 1:nrow(comparaciones), y = Sales), col='red') +
+  geom_line(aes(x = 1:nrow(comparaciones), y = predicciones), col='blue')
+```
+
+# Evaluando con métrica rmse
+
+```{r}
+rmse <- rmse(actual = comparaciones$Sales, predicted = comparaciones$predicciones)
+rmse
+```
+
+El valor de *Root Mean Square Error* de 1.525021, habrá que evaluarlo y compararlo con otro modelo para ver eficiencia de los modelos.
+
+# Interpretación
+
+Como interpretación podemos observar que al realizar el análisis de los datos por el modeo de regresión lineal multiple. El análisis de datos que hicimos fue con el conjunto de datos de "Advertising". Los datos se encuentran en la dirección <https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/Advertising.csv> y contiene en el data.frame(datos) 200 observaciones y 4 variables. La variable dependiente o variable objetivo es "*Sales"* que deberá estar en función de la inversión que se hace en *TV*, *Radio* o *Newspaper*. Hicimos una limpieza de datos que incluye quitar la variable x que no sea para nosotros de interes. En este analisis el valor de R-square es de 0.8932 lo cual esta por encima 80% y de Adjusted R-square con un valor de 0.8909 tambien por encima del 80% por lo que se acepta el modelo. Entonces los coeficientes son estadísticamente significativos para el modelo de este analisis de datos. Los valores del modelo de regresion multiple escogiendo las variables mas significativas en la seccion de "Summary modelo" son TV 0.047102 Radio 0.179522 Newspaper -0.002706. En el valor de *Root Mean Square Error* nos arroja un resultado de "1.525021".
+
+# Bibliografía
+
+Urrutia Mosquera, Jorge Andrés. 2011. "Evaluación de La Robustez de Un Modelo de Regresión múltiple Para Predecir Las Ventas Diarias de Un Hipermercado En Pereira, Risaralda." <https://www.researchgate.net/publication/237041228_EVALUACION_DE_LA_ROBUSTEZ_DE_UN_MODELO_DE_REGRESION_MULTIPLE_PARA_PREDECIR_LAS_VENTAS_DIARIAS_DE_UN_HIPERMERCADO_EN_PEREIRA_RISARALDA>.
+
+Walpole, Ronald E., Raymond H. Myers, and Sharon L. Myers. 2012b. *Probabilidad y Estadística Para Ingeniería y Ciencias*. Novena Edición. México: Pearson.
+
+---------. 2012c. *Probabilidad y Estadística Para Ingeniería y Ciencias*. Novena Edición. México: Pearson.
+
+---------. 2012a. *Probabilidad y Estadística Para Ingeniería y Ciencias*. Novena Edición. México: Pearson.
