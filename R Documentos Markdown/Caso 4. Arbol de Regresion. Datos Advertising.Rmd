@@ -1,0 +1,199 @@
+---
+title: "Caso 4. Arbol de Regresion. Datos Advertising"
+author: Jesús Miguel Acosta Gurrola
+date: 21/03/2022
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    toc_depth: 6
+    number_sections: yes
+---
+
+# Objetivo
+
+Construir y evaluar un modelo de árbol de regresión para realizar predicciones y comparar resultados con el modelo de regresión lineal múltiple.
+
+# Descripción
+
+-   Se cargan las librerías necesarias
+
+-   Se cargan los datos Se exploran los datos
+
+-   Se crean los datos de entrenamiento y validación 70% y 30% respectivamente
+
+Las métricas a valorar serán:
+
+-   Que los coeficientes sean estadísticamente significativos por encima del 95%.
+
+-   *R Squared Ajustado* el modelo se acepta si sobrepasa en el 80%
+
+-   *rmse* comparado con otro modelo mismos datos se acepta o se establece que un modelo es mejor que otro.
+
+-   Comparaciones con el modelo de regresión lineal múltiple
+
+# Marco Teórico
+
+Los árboles de regresión/clasificación tienen como objetivo predecir la variable respuesta Y en función de covariables. Los árboles de regresión permiten al igual que otros modelos de regresión predecir una variable dependiente Y en relación varias variables independentes Xs.
+
+# Desarrollo
+
+## Cargar librerías
+
+```{r warning=FALSE, message=FALSE}
+library(readr) # Para importar datos
+library(dplyr) # Para filtrar   
+library(knitr) # Para datos tabulares
+library(ggplot2) # Para visualizar
+library(plotly)
+library(caret)  # Para particionar
+library(Metrics) # Para determinar rmse
+
+library(rpart) # Para árbol
+library(rpart.plot) # Para árbol
+```
+
+## Cargar datos
+
+```{r}
+datos <- read.csv("https://raw.githubusercontent.com/rpizarrog/Analisis-Inteligente-de-datos/main/datos/Advertising.csv")
+```
+
+## Explorando datos
+
+```{r echo=FALSE}
+summary(datos)
+```
+
+```{r}
+str(datos)
+```
+
+Son 200 registros tres variables independientes y una variable dependiente.
+
+La variable dependiente o variable objetivo es *Sales* que deberá estar en función de la inversión que se hace en *TV*, *Radio* o *Newspaper*.
+
+## Limpiar datos
+
+Quitar la variable x que no es de interés
+
+```{r}
+datos <- datos %>%
+  select (TV, Radio, Newspaper, Sales)
+```
+
+### head(datos)
+
+```{r}
+kable(head(datos, 20), caption = "Primeros 20 registros")
+```
+
+### tail(datos)
+
+```{r}
+kable(tail(datos, 20), caption = "Últimos 20 registros")
+```
+
+# Datos de entrenamiento y validación
+
+## Datos de entrenamiento
+
+```{r}
+n <- nrow(datos)
+
+# Modificar la semilla estableciendo como parámetro los útimos cuatro dígitos de su no de control. 
+# Ej. set.seed(0732), o set.seed(1023)
+# set.seed(2022) 
+set.seed(0421)
+```
+
+De manera aleatoria se construyen los datos de entrenamiento y los datos de validación.
+
+En la variable *entrena* se generan los registros que van a ser los datos de entrenamiento, de tal forma que los datos de validación serán los que no sena de entrenamiento [-*entrena*].
+
+```{r}
+entrena <- createDataPartition(y = datos$Sales, p = 0.70, list = FALSE, times = 1)
+
+# Datos entrenamiento
+datos.entrenamiento <- datos[entrena, ]  # [renglones, columna]
+
+# Datos validación
+datos.validacion <- datos[-entrena, ]
+```
+
+### head()
+
+```{r}
+kable(head(datos.entrenamiento, 20), caption = "Datos de Entrenamiento. Primeros 20 registros")
+```
+
+### tail()
+
+```{r}
+kable(tail(datos.entrenamiento, 20), caption = "Datos de entrenamiento ültimos 20 registros")
+```
+
+## Datos de validación
+
+Los datos de validación deben ser diferentes a los datos den entrenamiento.
+
+### head()
+
+```{r}
+kable(head(datos.validacion, 20), caption = "Datos de Validación Primeros 20 registros")
+```
+
+### tail()
+
+```{r}
+kable(tail(datos.validacion, 20), caption = "Datos de validació últimos 20 registros")
+```
+
+# Generar el modelo de arbol de regresión
+
+-   El comando para generar un modelo de árbol de decisión, usando la librería rpart
+
+-   La función lleva el mismo nombre
+
+```{r}
+set.seed(0421) # Semilla
+
+modelo <- rpart(formula = TV  ~ ., data = datos.entrenamiento)
+
+modelo
+```
+
+## Visualizar el arbol de regresión
+
+-   Dibujar el árbol mediante la función prp()
+
+## Arbol de regresión
+
+```{r echo=FALSE}
+prp(modelo, type = 2, nn = TRUE, 
+    fallen.leaves = TRUE, faclen = 4,
+    varlen = 8,  shadow.col = "gray")
+```
+
+## Predecir con los datos de validación
+
+```{r echo=FALSE}
+prediccion <- predict(object = modelo, newdata =  datos.validacion)
+
+prediccion
+```
+
+-   Ver los datos de predicción
+
+```{r}
+predicciones <- data.frame(datos.validacion, prediccion)
+
+kable(tail(predicciones, 20), caption = "Ultimos 20 registros")
+```
+
+# Interpretación
+
+En este analisis de datos usamos un conjunto de datos que es del conjunto de datos que abarca(TV, Sales, Newspaper, Radio). Para este analisis usamos los árboles de regresión y clasificación que tienen como objetivo predecir la variable respuesta Y en función de covariables, se uso como variable dependiente els "Sales" en este data.frame contamos con 200 observaciones y 4 variables, pero dentro de este se distribuye en datos.entrenamiento con 142 observaciones y 4 variables, y en datos.validacion con 58 observaciones y 4 variables cabe mencionar que las variables independientes de inversión son en *TV*, *Radio* o *Newspaper*. La variable que es estadisticamente significativa es "Sales" al realizar la evaluacion del modelo podemos notar que esta por encima del 90% lo que esto nos indica que es un buen modelo y y una buena predicción que esta en 94% con una evaluacion por encima de 95% .Dependiendo de la variable el modelo del arbol va evaluando la construccion para calcular el valor.
+
+Tenemos la comparacion del modelo de regresion lineal que es el metodo mas usado en estadıstica para predecir valores de variables continuas debido a su facil interpretacion, pero en muchas situaciones los estandares de el modelo no se cumplen y por consiguiente se tiende a forzar el modelo, llevando a conclusiones erroneas. Los arboles de regresión son una alternativa que no requiere realizar una predicción al azar sobre los datos a analizar y es un metodo de facil interpretacion de los resultados. Como en este caso al visualizar el arbol de regresión.
