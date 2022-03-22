@@ -1,5 +1,5 @@
 ---
-title: "Caso1.Regresion Lineal Simple Peso Estatura Datos FIFA"
+title: "Caso 1. Regresion Lineal Simple Peso Estatura Datos FIFA"
 author: Jesús Miguel Acosta Gurrola
 date: 03/03/2022
 output: html_document
